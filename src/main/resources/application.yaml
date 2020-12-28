@@ -1,0 +1,29 @@
+server.port: 4904
+
+logging:
+  level:
+    org.springframework.web.client.RestTemplate: DEBUG
+    org.springframework.security: DEBUG
+    org.springframework.web.filter.CommonsRequestLoggingFilter: DEBUG
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          tiga:
+            authorization-uri: https://sso.elan-vision.com/oauth/authorize
+            token-uri: https://sso.elan-vision.com/oauth/token
+            user-info-uri: https://sso.elan-vision.com/userinfo
+            jwk-set-uri: https://sso.elan-vision.com/.well-known/jwks.json
+            user-name-attribute: sub
+        registration:
+          tiga:
+            provider: tiga
+            client-name: "Elan Vision Single Sign On"
+            client-id: 59823962ef1d408585a67f7fcead6740
+            client-secret: s3cret
+            client-authentication-method: post
+            authorization-grant-type: authorization_code
+            redirect-uri: http://localhost:4904/login/oauth2/code/tiga
+            scope: ["book", "openid"]
