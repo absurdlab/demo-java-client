@@ -6,6 +6,11 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory;
+import org.springframework.security.oauth2.client.registration.ClientRegistration;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
+import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
 import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -25,6 +30,13 @@ public class DemoJavaClientApplication {
 				.anyRequest().authenticated()
 				.and()
 				.oauth2Login();
+		}
+
+		@Bean
+		public JwtDecoderFactory<ClientRegistration> idTokenDecoderFactory() {
+			OidcIdTokenDecoderFactory idTokenDecoderFactory = new OidcIdTokenDecoderFactory();
+			idTokenDecoderFactory.setJwsAlgorithmResolver(clientRegistration -> SignatureAlgorithm.ES256);
+			return idTokenDecoderFactory;
 		}
 	}
 
