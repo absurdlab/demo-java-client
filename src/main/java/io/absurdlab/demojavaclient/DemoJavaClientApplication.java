@@ -8,10 +8,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.oidc.authentication.OidcIdTokenDecoderFactory;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoderFactory;
-import org.springframework.web.filter.CommonsRequestLoggingFilter;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
@@ -26,6 +24,8 @@ public class DemoJavaClientApplication {
 	public static class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 		@Override
 		protected void configure(HttpSecurity http) throws Exception {
+			// 1. By default, OidcUserService is used to resolve userinfo, and it skips fetching /userinfo. So it
+			// fetching /userinfo is desired, implement OAuth2UserService
 			http.authorizeRequests()
 				.anyRequest().authenticated()
 				.and()
