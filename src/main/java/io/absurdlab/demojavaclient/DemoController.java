@@ -1,5 +1,6 @@
 package io.absurdlab.demojavaclient;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,7 @@ public class DemoController {
     }
 
     @GetMapping("/oidc")
-    public OidcUser getOidcUserPrincipal(@AuthenticationPrincipal OidcUser principal) {
+    public OidcUser getOidcUserPrincipal(@AuthenticationPrincipal OidcUser principal, Authentication auth) {
         return principal;
     }
 }
