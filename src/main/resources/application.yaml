@@ -36,10 +36,10 @@ spring:
       client:
         provider:
           tiga:
-            authorization-uri: https://sso.elan-vision.com/oauth/authorize
-            token-uri: https://sso.elan-vision.com/oauth/token
-            user-info-uri: https://sso.elan-vision.com/userinfo
-            jwk-set-uri: https://sso.elan-vision.com/.well-known/jwks.json
+            authorization-uri: https://tiga.elan-vision.com/oauth/authorize
+            token-uri: https://tiga.elan-vision.com/oauth/token
+            user-info-uri: https://tiga.elan-vision.com/userinfo
+            jwk-set-uri: https://tiga.elan-vision.com/.well-known/jwks.json
             user-name-attribute: sub
         registration:
           tiga:
@@ -49,5 +49,5 @@ spring:
             client-secret: s3cret
             client-authentication-method: post
             authorization-grant-type: authorization_code
-            redirect-uri: http://localhost:4904/login/oauth2/code/tiga
-            scope: ["book", "openid"]
+            redirect-uri: https://demo-sso-client.elan-vision.com/login/oauth2/code/tiga
+            scope: [ "email", "openid"]
