@@ -34,12 +34,14 @@ jobs:
       - name: Docker build
         run: docker build . --file Dockerfile --tag $IMAGE_NAME:${{ steps.vars.outputs.image_tag }}
       - name: Save docker image
-        run: docker save $IMAGE_NAME:${{ steps.vars.outputs.image_tag }} > image.tar
+        run: |
+          mkdir -p target/images
+          docker save $IMAGE_NAME:${{ steps.vars.outputs.image_tag }} > target/images/demo.tar
       - name: Upload docker image as artifact
         uses: actions/upload-artifact@v2
         with:
-          name: image
-          path: image.tar
+          name: images
+          path: target/images/*
       - name: Log into registry
         run: echo "${{ secrets.ALIYUN_DOCKER_PASSWORD }}" | docker login $DOCKER_SERVER -u ${{ secrets.ALIYUN_DOCKER_USERNAME }} --password-stdin
       - name: Push image
