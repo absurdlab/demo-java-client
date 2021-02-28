@@ -1,0 +1,46 @@
+name: Default
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - v*
+
+env:
+  IMAGE_NAME: "registry.cn-hangzhou.aliyuncs.com/elvsn/demo-sso-java-client"
+  DOCKER_SERVER: "registry.cn-hangzhou.aliyuncs.com"
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: Compute tag
+        id: vars
+        run: |
+          VERSION=""
+          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's/^refs\/tags\/v//')
+          [ "$VERSION" == "" ] && VERSION="$(git rev-parse --short HEAD)"
+          echo VERSION=$VERSION
+          echo "::set-output name=image_tag::$VERSION"
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+      - name: Maven build
+        run: mvn clean package
+      - name: Docker build
+        run: docker build . --file Dockerfile --tag $IMAGE_NAME:${{ steps.vars.outputs.image_tag }}
+      - name: Save docker image
+        run: docker save $IMAGE_NAME:${{ steps.vars.outputs.image_tag }} > image.tar
+      - name: Upload docker image as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: image
+          path: image.tar
+      - name: Log into registry
+        run: echo "${{ secrets.ALIYUN_DOCKER_PASSWORD }}" | docker login $DOCKER_SERVER -u ${{ secrets.ALIYUN_DOCKER_USERNAME }} --password-stdin
+      - name: Push image
+        run: docker push $IMAGE_NAME:${{ steps.vars.outputs.image_tag }}
