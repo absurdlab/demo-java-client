@@ -5,11 +5,11 @@
 replicaCount: 1
 
 image:
-  repository: registry.cn-hangzhou.aliyuncs.com/elvsn/demo-sso-java-client
+  repository: ghcr.io/absurdlab/demo-sso-java-client
   pullPolicy: IfNotPresent
 
 imagePullSecrets:
-  - name: aliyuncr
+  - name: ghcr
 
 nameOverride: ""
 fullnameOverride: ""

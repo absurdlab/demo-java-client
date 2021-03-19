@@ -6,10 +6,15 @@ on:
       - master
     tags:
       - v*
+    paths-ignore:
+      - README.md
+  pull_request:
+    branches:
+      - master
 
 env:
-  IMAGE_NAME: "registry.cn-hangzhou.aliyuncs.com/elvsn/demo-sso-java-client"
-  DOCKER_SERVER: "registry.cn-hangzhou.aliyuncs.com"
+  IMAGE_NAME: "ghcr.io/absurdlab/demo-sso-java-client"
+  DOCKER_SERVER: "ghcr.io"
 
 jobs:
   build:
@@ -17,28 +22,83 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
-      - name: Compute tag
-        id: vars
-        run: |
-          VERSION=""
-          [[ "${{ github.ref }}" == "refs/tags/"* ]] && VERSION=$(echo "${{ github.ref }}" | sed -e 's/^refs\/tags\/v//')
-          [ "$VERSION" == "" ] && VERSION="$(git rev-parse --short HEAD)"
-          echo VERSION=$VERSION
-          echo "::set-output name=image_tag::$VERSION"
       - name: Setup Java
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
+      - name: Setup cache
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: ${{ runner.os }}-maven-
       - name: Maven build
         run: mvn clean package
-      - name: Docker build
-        run: docker build . --file Dockerfile --tag $IMAGE_NAME:${{ steps.vars.outputs.image_tag }}
-      - name: Save docker image
-        run: |
-          mkdir -p target/images
-          docker save $IMAGE_NAME:${{ steps.vars.outputs.image_tag }} > target/images/demo.tar
-      - name: Upload docker image as artifact
+      - name: Upload jar
         uses: actions/upload-artifact@v2
         with:
-          name: images
-          path: target/images/*
+          name: jar
+          path: target/*.jar
+
+  docker:
+    name: docker
+    runs-on: ubuntu-latest
+    needs:
+      - build
+    steps:
+      - uses: actions/checkout@v2
+      - run: mkdir target
+      - name: Download jar
+        uses: actions/download-artifact@v2
+        with:
+          name: jar
+          path: target/app.jar
+      - name: Log into registry
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ secrets.GHCR_USERNAME }}
+          password: ${{ secrets.GHCR_PASSWORD }}
+      - name: Setup Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          install: true
+      - name: Tagging
+        id: tagging
+        uses: crazy-max/ghaction-docker-meta@v1
+        with:
+          images: ghcr.io/absurdlab/demo-sso-java-client
+          tag-sha: true
+      - name: Build image
+        uses: docker/build-push-action@v2
+        with:
+          context: .
+          builder: ${{ steps.buildx.outputs.name }}
+          push: true
+          tags: ${{ steps.tagging.outputs.tags }}
+
+  release:
+    name: release
+    runs-on: ubuntu-latest
+    needs:
+      - docker
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure Git
+        run: |
+          git config user.name "$GITHUB_ACTOR"
+          git config user.email "$GITHUB_ACTOR@users.noreply.github.com"
+      - name: Install Helm
+        uses: azure/setup-helm@v1
+        with:
+          version: v3.4.0
+      - name: Release chart
+        uses: helm/chart-releaser-action@v1.2.0
+        with:
+          charts_dir: deploy/charts
+        env:
+          CR_TOKEN: "${{ secrets.GH_TOKEN }}"
