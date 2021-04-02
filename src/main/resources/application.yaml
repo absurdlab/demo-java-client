@@ -49,5 +49,5 @@ spring:
             client-secret: s3cret
             client-authentication-method: post
             authorization-grant-type: authorization_code
-            redirect-uri: https://sso.elan-vision.com/demo/springclient/login/oauth2/code/tiga
+            redirect-uri: https://springdemo.sso.elan-vision.com/login/oauth2/code/tiga
             scope: [ "email", "openid"]

@@ -41,12 +41,11 @@ ingress:
   enabled: true
   annotations:
     kubernetes.io/ingress.class: nginx
-    nginx.ingress.kubernetes.io/rewrite-target: /$2
-  host: sso.elan-vision.com
-  path: /demo/springclient(/|$)(.*)
+    cert-manager.io/cluster-issuer: letsencrypt
+  host: springdemo.sso.elan-vision.com
+  path: /
   tls:
-    clusterIssuer: letsencrypt
-    secretName: sso-tls
+    secretName: springdemo-sso-tls
 
 resources: {}
 #   limits:
