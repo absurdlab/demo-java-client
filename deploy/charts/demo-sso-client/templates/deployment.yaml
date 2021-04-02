@@ -14,10 +14,8 @@ spec:
       labels:
         {{- include "demo-sso-client.selectorLabels" . | nindent 8 }}
     spec:
-    {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+        - name: {{ include "demo-sso-client.imagePullSecret" . }}
       serviceAccountName: {{ include "demo-sso-client.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
@@ -25,8 +23,8 @@ spec:
         - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Chart.AppVersion }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          image: "{{ include "demo-sso-client.imageName" . }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ include "demo-sso-client.imagePullPolicy" . }}
           env:
             - name: SPRING_PROFILES_ACTIVE
               value: prod

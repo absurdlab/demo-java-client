@@ -61,3 +61,40 @@ Create the name of the service account to use
     {{ default "default" .Values.serviceAccount.name }}
 {{- end -}}
 {{- end -}}
+
+{{/*
+Image Name
+*/}}
+{{- define "demo-sso-client.imageName" -}}
+{{- if .Values.image.ghcr.enabled -}}
+{{ .Values.image.ghcr.name }}
+{{- else if .Values.image.aliyuncr.enabled -}}
+{{ .Values.image.aliyuncr.name }}
+{{- else -}}
+{{ .Values.image.default.name }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Image Pull Secret
+*/}}
+{{- define "demo-sso-client.imagePullSecret" -}}
+{{- if .Values.image.ghcr.enabled -}}
+{{ .Values.image.ghcr.pullSecret }}
+{{- else if .Values.image.aliyuncr.enabled -}}
+{{ .Values.image.aliyuncr.pullSecret }}
+{{- else -}}
+{{ .Values.image.default.pullSecret }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+Image Pull Policy
+*/}}
+{{- define "demo-sso-client.imagePullPolicy" -}}
+{{- if eq .Values.image.tag "master" -}}
+Always
+{{- else -}}
+IfNotPresent
+{{- end -}}
+{{- end -}}
